@@ -1,10 +1,11 @@
 # Author: Antony (Avery) Shim
-# Date: Sept 05, 2023
+# Date: Sep 05, 2023
 # Purpose: a basic GUI program to create, manipulate, and visualize data structures
 # ================================================================================
 
 # IMPORT
 from tkinter import *
+from tkinter.ttk import *
 
 # CONSTANTS
 COLOR_ONE = "#162129"
@@ -17,7 +18,7 @@ FONT_ONE = "Verdana"
 # =================================================
 
 # Author: Avery
-# Date: Sept 05, 2023
+# Date: Sep 05, 2023
 # Purpose: Basic node class
 
 # Data Elements:    data: str
@@ -39,7 +40,7 @@ class Node:
 
 
 # Author: Avery
-# Date: Sept 05, 2023
+# Date: Sep 05, 2023
 # Purpose: LinkedList class
 
 # Data Elements:    head: the first node of the linked list, None if linked list is empty
@@ -113,8 +114,113 @@ class LinkedList:
         return removed
 
 
+# Author: Avery
+# Date: Nov 06, 2023
+# Purpose: Data Structure GUI/Visualizer class
+
+# Data Elements:    form: a Tk window
+#                   canvas: a Canvas object
+#                   linked_list: a LinkedList
+
+# Methods:      __init__: initializes data elements and runs the GUI
+#               insert_node_GUI: inserts a given node into the chosen data structure and creates the object in canvas
+#               remove_node_GUI: removes a node with the target data from the chosen data structure and deletes the object in canvas
+#               exit_GUI: exits the GUI
+#               create_prompt_GUI: creates an Entry with a prompt allowing user input on data to add to or remove from linked_list, depending on choice
+#               enter_data_GUI: adds or removes data to/from linked_list, depending on choice
+#               run_GUI: runs the GUI
+
+class DataStructVisualizer:
+    def __init__(self) -> None:
+        """Initializes data elements and runs the GUI.
+        """
+        self.form = Tk()
+        self.canvas = Canvas(self.form)
+        self.linked_list = LinkedList()
+        self.run_GUI()
+
+
+    def insert_node_GUI(self, new_node_data = "") -> None:
+        """Inserts a new node containing new_node_data into linked_list.
+        """
+        self.linked_list.insert_node(new_node_data)
+
+
+    def remove_node_GUI(self, target_node_data = "") -> None:
+        """Removes the first node containing target_node_data from linked_list.
+        """
+        if self.linked_list.remove_node(target_node_data):
+            print("Successfully removed", target_node_data, "from the linked list.")
+        else:
+            print("The node", target_node_data, "is not in the linked list.")
+
+
+    def exit_GUI(self) -> None:
+        """Exits the GUI.
+        """
+        self.form.destroy()
+
+
+    def create_prompt_GUI(self, disable_list, prompt = "", choice = 0) -> None:
+        """Creates an Entry with a prompt allowing user input on data to add to or remove from linked_list, depending on choice.
+        """
+        for object in disable_list:
+            object.config(state = DISABLED)
+        prompt_label = Label(self.form, text = prompt)
+
+        data_var = StringVar()
+        input_entry = Entry(self.form, textvariable = data_var, font = (FONT_ONE, 11))
+        input_entry.grid(row = 0, column = 5, sticky = W + E, padx = 10, pady = 10)
+        
+        input_button = Button(self.form, text = "Enter", command = lambda:self.enter_data_GUI(disable_list, data_var.get(), choice, [prompt_label, input_entry, input_button]))
+        input_button.grid(row = 1, column = 5, sticky = W + E, padx = 10, pady = 10)
+        data_var.set("")
+
+
+    def enter_data_GUI(self, enable_list, data = "", choice = 0, remove_widgets_list = []) -> None:
+        """Adds or removes data to/from linked_list, depending on choice.
+        """
+        match choice:
+            case 1:
+                self.insert_node_GUI(data)
+            case 2:
+                self.remove_node_GUI(data)
+            case _:
+                print("Error! Invalid option.")
+
+        for widget in remove_widgets_list:
+            widget.destroy()
+        
+        for object in enable_list:
+            object.config(state = NORMAL)
+
+
+    def create_node_linked_list(self) -> None:
+        """Creates a node for a linked list in canvas.
+        """
+        pass
+
+    
+    def run_GUI(self) -> None:
+        """Runs the GUI.
+        """
+
+        self.canvas.grid(row = 0, column = 0, rowspan = 6, columnspan = 6, sticky = W + E, padx = 10, pady = 10)
+
+        exit_button = Button(self.form, text = 'EXIT', command = lambda:self.exit_GUI())
+        exit_button.grid(row = 4, column = 4, sticky = W + E, padx = 10, pady = 10)
+
+        insert_button = Button(self.form, text = 'Insert Node', command = lambda:self.create_prompt_GUI((insert_button, remove_button), prompt = "Enter the data to insert into the linked list:", choice = 1))
+        insert_button.grid(row = 4, column = 0, sticky = W + E, padx = 10, pady = 10)
+
+        remove_button = Button(self.form, text = 'Remove Node', command = lambda:self.create_prompt_GUI((insert_button, remove_button), prompt = "Enter the data to remove from the linked list:", choice = 2))
+        remove_button.grid(row = 4, column = 1, sticky = W + E, padx = 10, pady = 10)
+        self.form.mainloop()
+
+    
+
 #Author: Avery
-#Date: Sept 25, 2023
+#Date: Sep 25, 2023
 #Parameters: given_val -> int, min_val -> int, max_val -> int, default_val -> int
 #Return: default_val if given_val not in [min_val, max_val]; otherwise, given_val
 #=================================
@@ -128,7 +234,7 @@ def check_int(given_val = 0, min_val = 0, max_val = 0, default_val = 0) -> int:
 
 
 #Author: Avery
-#Date: Sept 05, 2023
+#Date: Sep 05, 2023
 #Parameters: none
 #Return: none
 #=================================
@@ -146,6 +252,8 @@ def exit_GUI() -> None:
 def create_prompt_GUI(linked_list = None, prompt = "", choice = 0) -> None:
     """Creates an Entry with a prompt allowing user input on data to add to or remove from linked_list, depending on choice.
     """
+    insert_button.config(state = DISABLED)
+    remove_button.config(state = DISABLED)
     prompt_label = Label(form, text = prompt)
 
     data_var = StringVar()
@@ -175,6 +283,9 @@ def enter_data_GUI(linked_list = None, data = "", choice = 0, widgets_list = [])
 
     for widget in widgets_list:
         widget.destroy()
+    
+    insert_button.config(state = NORMAL)
+    remove_button.config(state = NORMAL)
 
 
 #Author: Avery
@@ -199,7 +310,7 @@ def remove_node_GUI(linked_list = None, target_node_data = "") -> None:
     """Removes the first node containing target_node_data from linked_list.
     """
     if linked_list.remove_node(target_node_data):
-        print("Successfully rmeoved", target_node_data, "from the linked list.")
+        print("Successfully removed", target_node_data, "from the linked list.")
     else:
         print("The node", target_node_data, "is not in the linked list.")
     output_text.insert(END, linked_list)
@@ -209,7 +320,7 @@ def remove_node_GUI(linked_list = None, target_node_data = "") -> None:
 # MAIN
 
 testList = LinkedList()
-
+"""
 form = Tk()
 form.title('Data Structure Visualizer')
 form.config(bg=COLOR_ONE)
@@ -218,17 +329,20 @@ form.config(bg=COLOR_ONE)
 output_text = Text(form)
 output_text.grid(row = 0, column = 0, rowspan = 3, columnspan = 5, sticky = W + E, padx = 10, pady = 10)
 
-exit_button = Button(form, text = 'EXIT', font = (FONT_ONE, 11), fg = 'white', bg = COLOR_TWO, width = 2, height = 1, command = lambda:exit_GUI())
+output_canvas = Canvas(form, bg="blue")
+output_canvas.grid(row = 0, column = 6, sticky = W + E, padx = 10, pady = 10)
+node1_data = output_canvas.create_rectangle(10, 10, 60, 60, fill="green")
+node1_next = output_canvas.create_rectangle(60, 10, 110, 60, fill="green")
+
+exit_button = Button(form, text = 'EXIT', command = lambda:exit_GUI())
 exit_button.grid(row = 4, column = 4, sticky = W + E, padx = 10, pady = 10)
 
-insert_button = Button(form, text = 'Insert Node', font = (FONT_ONE, 11), fg = 'white', bg = COLOR_TWO, width = 2, height = 1, \
-                       command = lambda:create_prompt_GUI(linked_list = testList, prompt = "Enter the data to insert into the linked list:", choice = 1))
+insert_button = Button(form, text = 'Insert Node', command = lambda:create_prompt_GUI(linked_list = testList, prompt = "Enter the data to insert into the linked list:", choice = 1))
 insert_button.grid(row = 4, column = 0, sticky = W + E, padx = 10, pady = 10)
 
-remove_button = Button(form, text = 'Remove Node', font = (FONT_ONE, 11), fg = 'white', bg = COLOR_TWO, width = 2, height = 1, \
-                       command = lambda:create_prompt_GUI(linked_list = testList, prompt = "Enter the data to remove from the linked list:", choice = 2))
+remove_button = Button(form, text = 'Remove Node', command = lambda:create_prompt_GUI(linked_list = testList, prompt = "Enter the data to remove from the linked list:", choice = 2))
 remove_button.grid(row = 4, column = 1, sticky = W + E, padx = 10, pady = 10)
-
+"""
 
 """
 loopBreak = False
@@ -267,4 +381,6 @@ while not loopBreak:
         loopBreak = True
 """
 
-form.mainloop()
+#form.mainloop()
+
+test = DataStructVisualizer()
